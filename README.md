@@ -1,7 +1,8 @@
 # majsoul-helper
 
 > 从 [majsoul-helper](https://github.com/lqgl/majsoul-helper) 改造而成的，更改了 ```requirements.txt``` 与 Akagi 的一样，并同步更改了bot中的文件适配，不用手动下载 libriichi 了，pip时自动到 [riichi](https://github.com/shinkuan/Akagi/releases/expanded_assets/v0.1.1-libriichi) 这里下载
-> **改用edge** 直接使用电脑自带的**不用再下载**chromium了
+> 
+> **改用edge** 直接使用电脑**自带**的**不用再下载**chromium了
 
 ## 现有功能:
 
@@ -48,7 +49,7 @@ python pip install --upgrade pip
 python pip install -r requirements.txt
 ```
 
-不用 ```python playwright install chromium``` 自己改成使用edge的了
+> 不用 ```python playwright install chromium``` 自己改成**使用edge**的了
 
 使用 Akagi
 
