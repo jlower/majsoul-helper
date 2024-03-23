@@ -5,7 +5,7 @@ data
 __pycache__
 
 # akagi files
-*.so
-*.pyd
-*.pth
+# *.so
+# *.pyd
+# *.pth
 

@@ -1,0 +1,2 @@
+E:/GAME/Tool/日麻/MajsoulAI/Akagi/majsoul-helper/mjai/bot/mortal.pth filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
