@@ -1,0 +1,11 @@
+# playwright data
+data
+
+# python cache
+__pycache__
+
+# akagi files
+*.so
+*.pyd
+*.pth
+
