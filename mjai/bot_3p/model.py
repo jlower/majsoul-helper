@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import torch
 import pathlib
@@ -8,8 +9,9 @@ from torch.distributions import Normal, Categorical
 from typing import *
 from functools import partial
 from itertools import permutations
-from .libriichi.mjai import Bot
-from .libriichi.consts import obs_shape, oracle_obs_shape, ACTION_SPACE, GRP_SIZE
+import riichi
+import gzip
+import requests
 
 class ChannelAttention(nn.Module):
     def __init__(self, channels, ratio=16, actv_builder=nn.ReLU, bias=True):
@@ -115,9 +117,9 @@ class Brain(nn.Module):
         self.is_oracle = is_oracle
         self.version = version
 
-        in_channels = obs_shape(version)[0]
+        in_channels = riichi.consts.obs_shape(version)[0]
         if is_oracle:
-            in_channels += oracle_obs_shape(version)[0]
+            in_channels += riichi.consts.oracle_obs_shape(version)[0]
 
         norm_builder = partial(nn.BatchNorm1d, conv_channels, momentum=0.01)
         actv_builder = partial(nn.Mish, inplace=True)
@@ -205,7 +207,7 @@ class DQN(nn.Module):
         match version:
             case 1:
                 self.v_head = nn.Linear(512, 1)
-                self.a_head = nn.Linear(512, ACTION_SPACE)
+                self.a_head = nn.Linear(512, riichi.consts.ACTION_SPACE)
             case 2 | 3:
                 hidden_size = 512 if version == 2 else 256
                 self.v_head = nn.Sequential(
@@ -216,15 +218,15 @@ class DQN(nn.Module):
                 self.a_head = nn.Sequential(
                     nn.Linear(1024, hidden_size),
                     nn.Mish(inplace=True),
-                    nn.Linear(hidden_size, ACTION_SPACE),
+                    nn.Linear(hidden_size, riichi.consts.ACTION_SPACE),
                 )
             case 4:
-                self.net = nn.Linear(1024, 1 + ACTION_SPACE)
+                self.net = nn.Linear(1024, 1 + riichi.consts.ACTION_SPACE)
                 nn.init.constant_(self.net.bias, 0)
 
     def forward(self, phi, mask):
         if self.version == 4:
-            v, a = self.net(phi).split((1, ACTION_SPACE), dim=-1)
+            v, a = self.net(phi).split((1, riichi.consts.ACTION_SPACE), dim=-1)
         else:
             v = self.v_head(phi)
             a = self.a_head(phi)
@@ -234,6 +236,7 @@ class DQN(nn.Module):
         q = (v + a - a_mean).masked_fill(~mask, -torch.inf)
         return q
     
+online_valid = False
 
 class MortalEngine:
     def __init__(
@@ -251,6 +254,9 @@ class MortalEngine:
         boltzmann_epsilon = 0,
         boltzmann_temp = 1,
         top_p = 1,
+        online = False,
+        api_key = None,
+        server = None,
     ):
         self.engine_type = 'mortal'
         self.device = device or torch.device('cpu')
@@ -270,7 +276,40 @@ class MortalEngine:
         self.boltzmann_temp = boltzmann_temp
         self.top_p = top_p
 
+        self.online = online
+        self.api_key = api_key
+        self.server = server
+        if self.online:
+            assert self.version == 4, 'To use online, local model version must be 4'
+
     def react_batch(self, obs, masks, invisible_obs):
+        if self.online:
+            global online_valid
+            try:
+                list_obs = [o.tolist() for o in obs]
+                list_masks = [m.tolist() for m in masks]
+                post_data = {
+                    'obs': list_obs,
+                    'masks': list_masks,
+                }
+                data = json.dumps(post_data, separators=(',', ':'))
+                compressed_data = gzip.compress(data.encode('utf-8'))
+                headers = {
+                    'Authorization': self.api_key,
+                    'Content-Encoding': 'gzip',
+                }
+                r = requests.post(f'{self.server}/react_batch',
+                    headers=headers,
+                    data=compressed_data,
+                    timeout=2)
+                assert r.status_code == 200
+                online_valid = True
+                r_json = r.json()
+                return r_json['actions'], r_json['q_out'], r_json['masks'], r_json['is_greedy']
+            except:
+                online_valid = False
+                pass
+
         with (
             torch.autocast(self.device.type, enabled=self.enable_amp),
             torch.no_grad(),
@@ -305,7 +344,6 @@ class MortalEngine:
         else:
             is_greedy = torch.ones(batch_size, dtype=torch.bool, device=self.device)
             actions = q_out.argmax(-1)
-
         return actions.tolist(), q_out.tolist(), masks.tolist(), is_greedy.tolist()
 
 def sample_top_p(logits, p):
@@ -321,7 +359,12 @@ def sample_top_p(logits, p):
     sampled = probs_idx.gather(-1, probs_sort.multinomial(1)).squeeze(-1)
     return sampled
 
-def load_model(seat: int) -> Bot:
+def load_model(seat: int) -> riichi.mjai.Bot:
+    engine = get_engine()
+    bot = riichi.mjai.Bot(engine, seat)
+    return bot
+
+def get_engine() -> MortalEngine:
 
     # check if GPU is available
     if torch.cuda.is_available():
@@ -336,13 +379,18 @@ def load_model(seat: int) -> Bot:
 
     # Get the path of control_state_file = current directory / control_state_file
     control_state_file = pathlib.Path(__file__).parent / control_state_file
-
-
     state = torch.load(control_state_file, map_location=device)
+
     mortal = Brain(version=state['config']['control']['version'], conv_channels=state['config']['resnet']['conv_channels'], num_blocks=state['config']['resnet']['num_blocks']).eval()
     dqn = DQN(version=state['config']['control']['version']).eval()
     mortal.load_state_dict(state['mortal'])
     dqn.load_state_dict(state['current_dqn'])
+
+    with open(pathlib.Path(__file__).parent / 'online.json', 'r') as f:
+        json_load = json.load(f)
+        server = json_load['server']
+        online = json_load['online']
+        api_key = json_load['api_key']
 
     engine = MortalEngine(
         mortal,
@@ -351,10 +399,12 @@ def load_model(seat: int) -> Bot:
         device = device,
         enable_amp = False,
         enable_quick_eval = False,
-        enable_rule_based_agari_guard = True,
+        enable_rule_based_agari_guard = False,
         name = 'mortal',
-        version= state['config']['control']['version']
+        version = state['config']['control']['version'],
+        online = online,
+        api_key = api_key,
+        server = server,
     )
 
-    bot = Bot(engine, seat)
-    return bot
+    return engine

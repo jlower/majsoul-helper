@@ -1,5 +1,3 @@
 activate
-conda activate majsoulai
+conda activate hit
 python main.py
-
-

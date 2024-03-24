@@ -1,5 +1,8 @@
 import json
 import sys
+import hashlib
+import pathlib
+import requests
 
 from loguru import logger
 
@@ -9,12 +12,32 @@ from . import model
 class Bot:
     def __init__(self, player_id: int):
         self.player_id = player_id
+        model_path = pathlib.Path(__file__).parent / f"mortal.pth"
         self.model = model.load_model(player_id)
+        with open(model_path, "rb") as f:
+            self.model_hash = hashlib.sha256(f.read()).hexdigest()
+        try:
+            with open(pathlib.Path(__file__).parent / "online.json", "r") as f:
+                online_json = json.load(f)
+                self.online = online_json["online"]
+                if not self.online:
+                    return
+                api_key = online_json["api_key"]
+                server = online_json["server"]
+                headers = {
+                    'Authorization': api_key,
+                }
+                r = requests.post(f"{server}/check", headers=headers)
+                r_json = r.json()
+                if r_json["result"] == "success":
+                    self.model_hash = "online"
+        except Exception as e:
+            logger.error(e)
+            self.online = False
 
     def react(self, events: str) -> str:
         events = json.loads(events)
 
-        # logger.info("hi")
         return_action = None
         for e in events:
             return_action = self.model.react(json.dumps(e, separators=(",", ":")))
@@ -23,9 +46,13 @@ class Bot:
             return json.dumps({"type":"none"}, separators=(",", ":"))
         else:
             raw_data = json.loads(return_action)
-            del raw_data["meta"]
+            if self.online:
+                raw_data["online"] = model.online_valid
             return json.dumps(raw_data, separators=(",", ":"))
 
+    def state(self):
+        return self.model.state
+        
 
 def main():
     player_id = int(sys.argv[1])
@@ -40,5 +67,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # debug()
     main()
