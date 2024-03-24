@@ -303,7 +303,7 @@ class Action:
         # 这里是mjai的events
         # https://mjai.app/docs/mjai-protocol#:~:text=Flowchart-,Events,-Start%20Game
         if mtype in ['none', 'chi', 'pon', 'daiminkan', 'ankan', 'kakan', 'hora', 'reach', 'ryukyoku', 'nukidora']:
-            time.sleep(random.uniform(2.3, 2.5))
+            time.sleep(random.uniform(1.8, 4.2))
             self.click_chiponkan(mjai_msg, tehai, tsumohai)
             # kan can have multiple candidates too! ex: tehai=1111m 1111p 111s 11z, tsumohai=1s
         
