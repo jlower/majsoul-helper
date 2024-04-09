@@ -1,1 +1,3 @@
-1
+目前是 model_v4_20240308_best_min 模型
+
+模型要改名为mortal.pth才能用
