@@ -130,7 +130,7 @@ class Action:
     def decide_random_time(self):
         if self.isNewRound:
             return random.uniform(3.5, 4.8)
-        return random.uniform(1.9, 4.1)
+        return random.uniform(1.9, 3.9)
 
     def click_chiponkan(self, mjai_msg: dict | None, tehai: list[str], tsumohai: str | None):
         latest_operation_list_temp = self.latest_operation_list.copy()
@@ -293,6 +293,7 @@ class Action:
         ai_pais = meta_to_recommend(mjai_msg['meta'])
         selected_pai = ai_pais[0][0]
 
+        # 废弃的方法
         # global first_pai_count
         # global all_pai_count
         # all_pai_count += 1
@@ -374,6 +375,7 @@ class Action:
         #     selected_pai = ai_pais[0][0]
         # print(str(first_pai_count), " / ", str(all_pai_count))
         
+        # 废弃的方法
         # if len(ai_pais) > 1 and ai_pais[0][1] < 0.63:
         #     # 以13%的概率选择第二个，87%的概率选择第一个
         #     if random.random() < 0.87:
@@ -383,25 +385,29 @@ class Action:
         # else:
         #     selected_pai = ai_pais[0][0]
 
-        # rating低，随机掉分
-        # 增加非一选的概率
-        ex_weight = 1.0
-        # 筛选出概率大于0.245的元组
-        filtered_list = [(pai, prob + ex_weight) for pai, prob in ai_pais if prob > 0.245]
-        # 计算总权重
-        total_weight = sum(prob for _, prob in filtered_list)
-        # 随机选择一个操作
-        random_value = random.uniform(0, total_weight)
-        cumulative_weight = 0
-        selected_pai = None
-        for pai, prob in filtered_list:
-            cumulative_weight += prob
-            if random_value <= cumulative_weight:
-                selected_pai = pai
-                break
+        # 用此方法随机，若注释此段则一直一选
+        if ai_pais[0][1] < 0.72:
+            # 增加非一选的概率:
+            ex_weight = 1.0
+            # 筛选出概率大于0.2的元组
+            filtered_list = [(pai, prob + ex_weight) for pai, prob in ai_pais if prob > 0.2]
+            # # 给非一选增加ex_weight概率
+            # for i, (pai, prob) in enumerate(filtered_list):
+            #     if i != 0:
+            #         filtered_list[i] = (pai, prob + ex_weight)
+            # 计算总权重
+            total_weight = sum(prob for _, prob in filtered_list)
+            # 随机选择一个操作
+            random_value = random.uniform(0, total_weight)
+            cumulative_weight = 0
+            selected_pai = None
+            for pai, prob in filtered_list:
+                cumulative_weight += prob
+                if random_value <= cumulative_weight:
+                    selected_pai = pai
+                    break
 
         mjai_msg['pai'] = selected_pai
-
         dahai = mjai_msg['pai']
         if self.isNewRound:
             # In Majsoul, if you are the first dealer, there is no tsumohai, but 14 tehai.
