@@ -1,13 +1,13 @@
 # majsoul-helper
 
-> 从 [majsoul-helper](https://github.com/lqgl/majsoul-helper) 改造而成的，更改了 ```requirements.txt``` 与 Akagi 的一样，并同步更改了bot中的文件适配，不用手动下载 libriichi 了，pip时自动到 [riichi](https://github.com/shinkuan/Akagi/releases/expanded_assets/v0.1.1-libriichi) 这里下载
-> 
+> ~~从 [majsoul-helper](https://github.com/lqgl/majsoul-helper) 改造而成的~~，更改了 ```requirements.txt``` 与 Akagi 的一样，并同步更改了bot中的文件适配，不用手动下载 libriichi 了，pip时自动到 [riichi](https://github.com/shinkuan/Akagi/releases/expanded_assets/v0.1.1-libriichi) 这里下载，添加了随机延迟和随机出牌
+>
 > **改用edge** 直接使用电脑**自带**的**不用再下载**chromium了
 
-## 现有功能:
+## 现有功能
 
 - [x] 支持[Akagi](https://github.com/shinkuan/Akagi)
-- [x] 自动打牌
+- [x] 自动打牌，自动随机出牌
 - [ ] 自动连续打牌
 
 ## 欢迎 PR
@@ -66,8 +66,6 @@ python main.py
 
 - [Akagi](https://github.com/shinkuan/Akagi)
 
-- [majsoul-hook-mitm](https://github.com/anosora233/majsoul-hook-mitm)
-
 ## 交流群
 
-[Discord](https://discord.gg/NTXFtuRK)
+[Discord](https://discord.gg/)

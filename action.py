@@ -3,52 +3,55 @@ import random
 from convert import MS_TILE_2_MJAI_TILE
 from functools import cmp_to_key
 from majsoul2mjai import compare_pai
+from libriichi_helper import meta_to_recommend, state_to_tehai
 from loguru import logger
 
 click_list = []
 do_autohu = False
+first_pai_count = 0
+all_pai_count = 0
 
 # Coordinates here is on the resolution of 16x9
 LOCATION = {
     "tiles": [
-        (2.23125  , 8.3625),
-        (3.021875 , 8.3625),
-        (3.8125   , 8.3625),
-        (4.603125 , 8.3625),
-        (5.39375  , 8.3625),
-        (6.184375 , 8.3625),
-        (6.975    , 8.3625),
-        (7.765625 , 8.3625),
-        (8.55625  , 8.3625),
-        (9.346875 , 8.3625),
-        (10.1375  , 8.3625),
+        (2.23125, 8.3625),
+        (3.021875, 8.3625),
+        (3.8125, 8.3625),
+        (4.603125, 8.3625),
+        (5.39375, 8.3625),
+        (6.184375, 8.3625),
+        (6.975, 8.3625),
+        (7.765625, 8.3625),
+        (8.55625, 8.3625),
+        (9.346875, 8.3625),
+        (10.1375, 8.3625),
         (10.928125, 8.3625),
-        (11.71875 , 8.3625),
+        (11.71875, 8.3625),
         (12.509375, 8.3625),
     ],
     "tsumo_space": 0.246875,
     "actions": [
-        (10.875, 7), #none       #
-        (8.6375, 7),             #   5   4   3
-        (6.4   , 7),             #
-        (10.875, 5.9),           #   2   1   0
+        (10.875, 7),  # none       #
+        (8.6375, 7),  # 5   4   3
+        (6.4, 7),             #
+        (10.875, 5.9),  # 2   1   0
         (8.6375, 5.9),           #
-        (6.4   , 5.9),
+        (6.4, 5.9),
         (10.875, 4.8),           # Not used
         (8.6375, 4.8),           # Not used
-        (6.4   , 4.8),           # Not used
+        (6.4, 4.8),           # Not used
     ],
     "candidates": [
         (3.6625,  6.3),         # (-(len/2)+idx+0.5)*2+5
         (4.49625, 6.3),
-        (5.33 ,   6.3),
+        (5.33,   6.3),
         (6.16375, 6.3),
         (6.9975,  6.3),
         (7.83125, 6.3),         # 5 mid
         (8.665,   6.3),
         (9.49875, 6.3),
         (10.3325, 6.3),
-        (11.16625,6.3),
+        (11.16625, 6.3),
         (12,      6.3),
     ],
     "candidates_kan": [
@@ -65,10 +68,11 @@ LOCATION = {
 # Refer to majsoul2mjai.Operation
 ACTION_PIORITY = [
     0,  # none      #
-    99, # Discard   # There is no discard button
+    99,  # Discard   # There is no discard button
     4,  # Chi       # Opponent Discard
     3,  # Pon       # Opponent Discard
-    3,  # Ankan     # Self Discard      # If Ankan and Kakan are both available, use only kakan.
+    # Ankan     # Self Discard      # If Ankan and Kakan are both available, use only kakan.
+    3,
     2,  # Daiminkan # Opponent Discard
     3,  # Kakan     # Self Discard
     2,  # Reach     # Self Discard
@@ -84,18 +88,20 @@ ACTION2TYPE = {
     "pon": 3,
     "daiminkan": 5,
     "hora": 9,
-    #^^^^^^^^^^^^^^^^Opponent Discard^^^^^^^^^^^^^^^^
+    # ^^^^^^^^^^^^^^^^Opponent Discard^^^^^^^^^^^^^^^^
     "ryukyoku": 10,
     "nukidora": 11,
     "ankan": 4,
     "kakan": 6,
     "reach": 7,
     "zimo": 8,
-    #^^^^^^^^^^^^^^^^Self Discard^^^^^^^^^^^^^^^^
+    # ^^^^^^^^^^^^^^^^Self Discard^^^^^^^^^^^^^^^^
 }
+
 
 def get_click_list():
     return click_list
+
 
 def get_autohu():
     return do_autohu
@@ -104,6 +110,7 @@ def get_autohu():
 #     settings = json.load(f)
 #     PLAYWRIGHT_RESOLUTION = (settings['Playwright']['width'], settings['Playwright']['height'])
 #     SCALE = PLAYWRIGHT_RESOLUTION[0]/16
+
 
 class Action:
     def __init__(self):
@@ -123,8 +130,7 @@ class Action:
     def decide_random_time(self):
         if self.isNewRound:
             return random.uniform(3.5, 4.8)
-        return random.uniform(1.9, 4.2)
-
+        return random.uniform(1.9, 4.1)
 
     def click_chiponkan(self, mjai_msg: dict | None, tehai: list[str], tsumohai: str | None):
         latest_operation_list_temp = self.latest_operation_list.copy()
@@ -148,7 +154,8 @@ class Action:
 
         # Sort latest_operation_list by ACTION_PIORITY
         # logger.debug(f"latest_operation_list_temp: {latest_operation_list_temp}")
-        latest_operation_list_temp.sort(key=lambda x: ACTION_PIORITY[x['type']])
+        latest_operation_list_temp.sort(
+            key=lambda x: ACTION_PIORITY[x['type']])
 
         if tsumohai != '?' and mjai_msg['type'] == 'hora':
             mjai_msg['type'] = 'zimo'
@@ -165,10 +172,11 @@ class Action:
             time.sleep(0.5)
             self.click_dahai(mjai_msg, tehai, tsumohai)
             return
-        
+
         if mjai_msg['type'] in ['chi', 'pon', 'ankan', 'kakan']:
             consumed_pais_mjai = mjai_msg['consumed']
-            consumed_pais_mjai = sorted(consumed_pais_mjai, key=cmp_to_key(compare_pai))
+            consumed_pais_mjai = sorted(
+                consumed_pais_mjai, key=cmp_to_key(compare_pai))
             if mjai_msg['type'] == 'chi':
                 for operation in self.latest_operation_list:
                     if operation['type'] == 2:
@@ -176,12 +184,16 @@ class Action:
                         if combination_len == 1:
                             return  # No need to click
                         for idx, combination in enumerate(operation['combination']):
-                            consumed_pais_liqi = [MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
-                            consumed_pais_liqi = sorted(consumed_pais_liqi, key=cmp_to_key(compare_pai))
+                            consumed_pais_liqi = [
+                                MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
+                            consumed_pais_liqi = sorted(
+                                consumed_pais_liqi, key=cmp_to_key(compare_pai))
                             if consumed_pais_mjai == consumed_pais_liqi:
                                 time.sleep(0.3)
-                                candidate_idx = int((-(combination_len/2)+idx+0.5)*2+5)
-                                self.page_clicker(LOCATION['candidates'][candidate_idx])
+                                candidate_idx = int(
+                                    (-(combination_len/2)+idx+0.5)*2+5)
+                                self.page_clicker(
+                                    LOCATION['candidates'][candidate_idx])
                                 return
             elif mjai_msg['type'] == 'pon':
                 for operation in self.latest_operation_list:
@@ -190,12 +202,16 @@ class Action:
                         if combination_len == 1:
                             return
                         for idx, combination in enumerate(operation['combination']):
-                            consumed_pais_liqi = [MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
-                            consumed_pais_liqi = sorted(consumed_pais_liqi, key=cmp_to_key(compare_pai))
+                            consumed_pais_liqi = [
+                                MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
+                            consumed_pais_liqi = sorted(
+                                consumed_pais_liqi, key=cmp_to_key(compare_pai))
                             if consumed_pais_mjai == consumed_pais_liqi:
                                 time.sleep(0.3)
-                                candidate_idx = int((-(combination_len/2)+idx+0.5)*2+5)
-                                self.page_clicker(LOCATION['candidates'][candidate_idx])
+                                candidate_idx = int(
+                                    (-(combination_len/2)+idx+0.5)*2+5)
+                                self.page_clicker(
+                                    LOCATION['candidates'][candidate_idx])
                                 return
             # If both Ankan (type 4) and Kakan (type 6) are available, only one kan button will be shown, and candidates = [kakan, ankan]
             elif mjai_msg['type'] in ['ankan', 'kakan']:
@@ -207,12 +223,16 @@ class Action:
                                 # impossible
                                 return
                             for idx, combination in enumerate(operation['combination']):
-                                consumed_pais_liqi = [MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
-                                consumed_pais_liqi = sorted(consumed_pais_liqi, key=cmp_to_key(compare_pai))
+                                consumed_pais_liqi = [
+                                    MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
+                                consumed_pais_liqi = sorted(
+                                    consumed_pais_liqi, key=cmp_to_key(compare_pai))
                                 if consumed_pais_mjai == consumed_pais_liqi:
                                     time.sleep(0.3)
-                                    candidate_idx = int((-(combination_len/2)+idx+0.5)*2+3)
-                                    self.page_clicker(LOCATION['candidates_kan'][candidate_idx])
+                                    candidate_idx = int(
+                                        (-(combination_len/2)+idx+0.5)*2+3)
+                                    self.page_clicker(
+                                        LOCATION['candidates_kan'][candidate_idx])
                                     return
                 elif mjai_msg['type'] == 'ankan':
                     for operation in self.latest_operation_list:
@@ -221,12 +241,16 @@ class Action:
                             if combination_len == 1:
                                 return
                             for idx, combination in enumerate(operation['combination']):
-                                consumed_pais_liqi = [MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
-                                consumed_pais_liqi = sorted(consumed_pais_liqi, key=cmp_to_key(compare_pai))
+                                consumed_pais_liqi = [
+                                    MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
+                                consumed_pais_liqi = sorted(
+                                    consumed_pais_liqi, key=cmp_to_key(compare_pai))
                                 if consumed_pais_mjai == consumed_pais_liqi:
                                     time.sleep(0.3)
-                                    candidate_idx = int((-(combination_len/2)+idx+0.5)*2+3)
-                                    self.page_clicker(LOCATION['candidates_kan'][candidate_idx])
+                                    candidate_idx = int(
+                                        (-(combination_len/2)+idx+0.5)*2+3)
+                                    self.page_clicker(
+                                        LOCATION['candidates_kan'][candidate_idx])
                                     return
                 elif mjai_msg['type'] == 'kakan':
                     for operation in self.latest_operation_list:
@@ -235,14 +259,17 @@ class Action:
                             if combination_len == 1:
                                 return
                             for idx, combination in enumerate(operation['combination']):
-                                consumed_pais_liqi = [MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
-                                consumed_pais_liqi = sorted(consumed_pais_liqi, key=cmp_to_key(compare_pai))
+                                consumed_pais_liqi = [
+                                    MS_TILE_2_MJAI_TILE[pai] for pai in combination.split('|')]
+                                consumed_pais_liqi = sorted(
+                                    consumed_pais_liqi, key=cmp_to_key(compare_pai))
                                 if consumed_pais_mjai == consumed_pais_liqi:
                                     time.sleep(0.3)
-                                    candidate_idx = int((-(combination_len/2)+idx+0.5)*2+3)
-                                    self.page_clicker(LOCATION['candidates_kan'][candidate_idx])
+                                    candidate_idx = int(
+                                        (-(combination_len/2)+idx+0.5)*2+3)
+                                    self.page_clicker(
+                                        LOCATION['candidates_kan'][candidate_idx])
                                     return
-
 
     def get_pai_coord(self, idx: int, tehais: list[str]):
         tehai_count = 0
@@ -252,14 +279,129 @@ class Action:
         if tehai_count >= 14:
             tehai_count = 13
         if idx == 13:
-            pai_cord = (LOCATION['tiles'][tehai_count][0] + LOCATION['tsumo_space'], LOCATION['tiles'][tehai_count][1])
+            pai_cord = (LOCATION['tiles'][tehai_count][0] +
+                        LOCATION['tsumo_space'], LOCATION['tiles'][tehai_count][1])
         else:
             pai_cord = LOCATION['tiles'][idx]
-        
+
         return pai_cord
 
     # tehai: 手牌 tsumohai：表示摸切的牌，即从牌山摸到的牌，并立刻打出。
     def click_dahai(self, mjai_msg: dict | None, tehai: list[str], tsumohai: str | None):
+
+        # 获取每个操作的ai推荐率
+        ai_pais = meta_to_recommend(mjai_msg['meta'])
+        selected_pai = ai_pais[0][0]
+
+        # global first_pai_count
+        # global all_pai_count
+        # all_pai_count += 1
+        # # 至少两个选项(如果立直就只剩一个选项)
+        # # 如果第一与第二的概率差距小于0.02
+        # if len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.02:
+        #     # 以95%的概率选择第二个，5%的概率选择第一个
+        #     if random.random() < 0.05:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.04
+        # if len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.06:
+        #     # 以90%的概率选择第二个，10%的概率选择第一个
+        #     if random.random() < 0.1:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.08
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.08:
+        #     # 以80%的概率选择第二个，20%的概率选择第一个
+        #     if random.random() < 0.2:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.11
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.11:
+        #     # 以65%的概率选择第二个，35%的概率选择第一个
+        #     if random.random() < 0.35:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.18
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.18:
+        #     # 以35%的概率选择第二个，65%的概率选择第一个
+        #     if random.random() < 0.65:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.24
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.24:
+        #     # 以20%的概率选择第二个，80%的概率选择第一个
+        #     if random.random() < 0.8:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.28
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.28:
+        #     # 以10%的概率选择第二个，90%的概率选择第一个
+        #     if random.random() < 0.9:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.35
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.35:
+        #     # 以8%的概率选择第二个，92%的概率选择第一个
+        #     if random.random() < 0.92:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # # 如果第一与第二的概率差距小于0.4
+        # elif len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.4:
+        #     # 以5%的概率选择第二个，95%的概率选择第一个
+        #     if random.random() < 0.95:
+        #         first_pai_count += 1
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # else:
+        #     first_pai_count += 1
+        #     selected_pai = ai_pais[0][0]
+        # print(str(first_pai_count), " / ", str(all_pai_count))
+        
+        # if len(ai_pais) > 1 and ai_pais[0][1] < 0.63:
+        #     # 以13%的概率选择第二个，87%的概率选择第一个
+        #     if random.random() < 0.87:
+        #         selected_pai = ai_pais[0][0]
+        #     else:
+        #         selected_pai = ai_pais[1][0]
+        # else:
+        #     selected_pai = ai_pais[0][0]
+
+        # rating低，随机掉分
+        # 增加非一选的概率
+        ex_weight = 1.0
+        # 筛选出概率大于0.245的元组
+        filtered_list = [(pai, prob + ex_weight) for pai, prob in ai_pais if prob > 0.245]
+        # 计算总权重
+        total_weight = sum(prob for _, prob in filtered_list)
+        # 随机选择一个操作
+        random_value = random.uniform(0, total_weight)
+        cumulative_weight = 0
+        selected_pai = None
+        for pai, prob in filtered_list:
+            cumulative_weight += prob
+            if random_value <= cumulative_weight:
+                selected_pai = pai
+                break
+
+        mjai_msg['pai'] = selected_pai
+
         dahai = mjai_msg['pai']
         if self.isNewRound:
             # In Majsoul, if you are the first dealer, there is no tsumohai, but 14 tehai.
@@ -269,7 +411,8 @@ class Action:
             temp_tehai = sorted(temp_tehai, key=cmp_to_key(compare_pai))
             for i in range(14):
                 if dahai == temp_tehai[i]:
-                    logger.debug(f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} i:{i}")
+                    logger.debug(
+                        f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} i:{i}")
                     pai_coord = self.get_pai_coord(i, temp_tehai)
                     self.page_clicker(pai_coord)
                     self.do_autohu()
@@ -277,22 +420,25 @@ class Action:
                     return
         if tsumohai != '?':
             if dahai == tsumohai:
-                logger.debug(f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} dahai== tsumohai")
+                logger.debug(
+                    f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} dahai== tsumohai")
                 pai_coord = self.get_pai_coord(13, tehai)
                 self.page_clicker(pai_coord)
                 return
         for i in range(13):
             if dahai == tehai[i]:
-                logger.debug(f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} i:{i}")
+                logger.debug(
+                    f"dahai:{dahai} tehai:{tehai} tsumohai:{tsumohai} isNewRound:{self.isNewRound} i:{i}")
                 pai_coord = self.get_pai_coord(i, tehai)
                 self.page_clicker(pai_coord)
                 break
-        
 
     def mjai2action(self, mjai_msg: dict | None, tehai: list[str], tsumohai: str | None):
         # print(f"mjai2action: mjai_msg:{mjai_msg} tehai:{tehai} tsomohai:{tsumohai}")
+        # 打印4p场每个操作ai的推荐率
+        print(meta_to_recommend(mjai_msg['meta']))
         # 将字符串解析为字典
-        dahai_delay = self.decide_random_time()     
+        dahai_delay = self.decide_random_time()
         if mjai_msg is None:
             return
         mtype = mjai_msg['type']
@@ -306,4 +452,3 @@ class Action:
             time.sleep(random.uniform(1.8, 3.8))
             self.click_chiponkan(mjai_msg, tehai, tsumohai)
             # kan can have multiple candidates too! ex: tehai=1111m 1111p 111s 11z, tsumohai=1s
-        

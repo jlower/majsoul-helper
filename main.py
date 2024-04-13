@@ -94,8 +94,8 @@ class MajsoulAutomator:
             if self.bridge.reach and mjai_msg["type"] == "dahai":
                 mjai_msg["type"] = "reach"
                 self.bridge.reach = False
-            print('-'*65)
-            print(mjai_msg)
+            # print('-'*65)
+            # print(mjai_msg)
             self.action.mjai2action(mjai_msg, self.bridge.my_tehais, self.bridge.my_tsumohai)
 
     def handle_click_list(self, page, click_list):
