@@ -385,7 +385,7 @@ class Action:
         # else:
         #     selected_pai = ai_pais[0][0]
 
-        # # 用此方法随机，若注释此段则一直一选
+        # # 用此方法随机，表现稍好，若注释此段则一直一选
         # if ai_pais[0][1] < 0.7:
         #     # 增加非一选的概率:
         #     ex_weight = 2.0
@@ -395,6 +395,24 @@ class Action:
         #     # for i, (pai, prob) in enumerate(filtered_list):
         #     #     if i != 0:
         #     #         filtered_list[i] = (pai, prob + ex_weight)
+        #     # 计算总权重
+        #     total_weight = sum(prob for _, prob in filtered_list)
+        #     # 随机选择一个操作
+        #     random_value = random.uniform(0, total_weight)
+        #     cumulative_weight = 0
+        #     selected_pai = None
+        #     for pai, prob in filtered_list:
+        #         cumulative_weight += prob
+        #         if random_value <= cumulative_weight:
+        #             selected_pai = pai
+        #             break
+
+        # # 用此方法随机，掉分，若注释此段则一直一选
+        # if ai_pais[0][1] < 0.9:
+        #     # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
+        #     ex_power = 0.8
+        #     # 筛选出概率大于0.1的元组
+        #     filtered_list = [(pai, prob ** ex_power) for pai, prob in ai_pais if prob > 0.1]
         #     # 计算总权重
         #     total_weight = sum(prob for _, prob in filtered_list)
         #     # 随机选择一个操作
