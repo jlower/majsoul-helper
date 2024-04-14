@@ -385,27 +385,27 @@ class Action:
         # else:
         #     selected_pai = ai_pais[0][0]
 
-        # 用此方法随机，若注释此段则一直一选
-        if ai_pais[0][1] < 0.72:
-            # 增加非一选的概率:
-            ex_weight = 1.0
-            # 筛选出概率大于0.2的元组
-            filtered_list = [(pai, prob + ex_weight) for pai, prob in ai_pais if prob > 0.2]
-            # # 给非一选增加ex_weight概率
-            # for i, (pai, prob) in enumerate(filtered_list):
-            #     if i != 0:
-            #         filtered_list[i] = (pai, prob + ex_weight)
-            # 计算总权重
-            total_weight = sum(prob for _, prob in filtered_list)
-            # 随机选择一个操作
-            random_value = random.uniform(0, total_weight)
-            cumulative_weight = 0
-            selected_pai = None
-            for pai, prob in filtered_list:
-                cumulative_weight += prob
-                if random_value <= cumulative_weight:
-                    selected_pai = pai
-                    break
+        # # 用此方法随机，若注释此段则一直一选
+        # if ai_pais[0][1] < 0.7:
+        #     # 增加非一选的概率:
+        #     ex_weight = 2.0
+        #     # 筛选出概率大于0.2的元组
+        #     filtered_list = [(pai, prob + ex_weight) for pai, prob in ai_pais if prob > 0.2]
+        #     # # 给非一选增加ex_weight概率
+        #     # for i, (pai, prob) in enumerate(filtered_list):
+        #     #     if i != 0:
+        #     #         filtered_list[i] = (pai, prob + ex_weight)
+        #     # 计算总权重
+        #     total_weight = sum(prob for _, prob in filtered_list)
+        #     # 随机选择一个操作
+        #     random_value = random.uniform(0, total_weight)
+        #     cumulative_weight = 0
+        #     selected_pai = None
+        #     for pai, prob in filtered_list:
+        #         cumulative_weight += prob
+        #         if random_value <= cumulative_weight:
+        #             selected_pai = pai
+        #             break
 
         mjai_msg['pai'] = selected_pai
         dahai = mjai_msg['pai']
