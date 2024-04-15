@@ -408,17 +408,16 @@ class Action:
         #             break
 
         # 用此方法随机，掉分，若注释此段则一直一选
-        if ai_pais[0][1] < 0.75:
+        if ai_pais[0][1] < 0.73:
             # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
-            ex_power = 0.45 # 取0.45时重合率75%~81%,分数93~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
-            # 筛选出概率大于0.1的元组
-            filtered_list = [(pai, prob ** ex_power) for pai, prob in ai_pais if prob > 0.1]
+            ex_power = 0.4 # 取0.45时重合率71%~81%,分数92~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
+            # 筛选出概率大于0.11的元组
+            filtered_list = [(pai, prob ** ex_power) for pai, prob in ai_pais if prob > 0.11]
             # 计算总权重
             total_weight = sum(prob for _, prob in filtered_list)
             # 随机选择一个操作
             random_value = random.uniform(0, total_weight)
             cumulative_weight = 0
-            selected_pai = None
             for pai, prob in filtered_list:
                 cumulative_weight += prob
                 if random_value <= cumulative_weight:
