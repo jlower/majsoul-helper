@@ -400,7 +400,6 @@ class Action:
         #     # 随机选择一个操作
         #     random_value = random.uniform(0, total_weight)
         #     cumulative_weight = 0
-        #     selected_pai = None
         #     for pai, prob in filtered_list:
         #         cumulative_weight += prob
         #         if random_value <= cumulative_weight:
