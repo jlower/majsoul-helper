@@ -57,7 +57,12 @@ class MajsoulAutomator:
         try:
             browser = self.launch_browser()
             page = browser.new_page()
+            # 国服
             page.goto('https://game.maj-soul.com/1/')
+            # 国际服
+            # page.goto('https://mahjongsoul.game.yo-star.com/')
+            # 日服
+            # page.goto('https://game.mahjongsoul.com/index.html')
             # https://stackoverflow.com/questions/73209567/close-or-switch-tabs-in-playwright-python
             all_pages = page.context.pages
             all_pages[0].close()
