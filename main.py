@@ -90,8 +90,8 @@ class MajsoulAutomator:
         if parse_msg['method'] == '.lq.NotifyGameBroadcast':
             # print("111111111111111111111111",parse_msg['method'])
             randomN = random.uniform(0.0, 100.0)
-            # 5%
-            if randomN <= 5.0:
+            # 50%
+            if randomN <= 50.0:
                 time.sleep(0.1)
                 xy = (15.675, 4.9625)
                 xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
