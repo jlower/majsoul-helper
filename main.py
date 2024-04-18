@@ -44,9 +44,10 @@ class MajsoulAutomator:
                 (12.4, 6.5), (13.65, 6.5), (14.8, 6.5),    # 7 8 9
             ]
         }
-        self.next_game_Rank = 'silver' # 可以选 铜之间: copper 银之间: silver 金之间: gold 玉之间: jade 王座之间: king
-        self.next_game_number = '4p' # 可以选 3p 4p
-        self.next_game_rounds = 'south' # 可以选 南风: south 东风: east
+        # 可以选 铜之间: copper 银之间: silver 金之间: gold 玉之间: jade 王座之间: king
+        self.next_game_Rank = 'silver'
+        self.next_game_number = '4p'  # 可以选 3p 4p
+        self.next_game_rounds = 'south'  # 可以选 南风: south 东风: east
 
     def launch_browser(self):
         self.playwright_context = sync_playwright().start()
@@ -148,8 +149,10 @@ class MajsoulAutomator:
             time.sleep(8)
 
             # 活动多了一个页面，临时添加的，不用时注释掉
-            # page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
-            # time.sleep(10)
+            xy_scale = {"x": self.LOCATION['endGameStage'][0][0] * scale,
+                        "y": self.LOCATION['endGameStage'][0][1] * scale}
+            page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
+            time.sleep(10)
 
             # 7. 大厅界面点击段位场
             xy_scale = {"x": self.LOCATION['endGameStage'][2][0] * scale,
