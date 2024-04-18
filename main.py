@@ -87,28 +87,28 @@ class MajsoulAutomator:
         websocket.on("framereceived", on_received)
 
     def randomEmotion(self, page, scale, parse_msg):
-        # print("111111111111111111111111",parse_msg['method'])
-        # if parse_msg['method'] == '.lq.NotifyGameBroadcast':
-        randomN = random.uniform(0.0, 100.0)
-        # 5%
-        if randomN <= 5.0:
-            time.sleep(0.1)
-            xy = (15.675, 4.9625)
-            xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
-            page.mouse.move(x=xy_scale["x"], y=xy_scale["y"])
-            time.sleep(0.1)
-            page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
-            logger.debug(f"page_clicker: {xy_scale} click emotions")
-            time.sleep(0.3)
-            index = random.randint(0, 8)
-            # index = 2
-            xy = self.LOCATION["emotions"][index]
-            xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
-            page.mouse.move(x=xy_scale["x"], y=xy_scale["y"])
-            time.sleep(0.1)
-            page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
-            logger.debug(
-                f"page_clicker: {xy_scale} click the {index} emotion")
+        if parse_msg['method'] == '.lq.NotifyGameBroadcast':
+            # print("111111111111111111111111",parse_msg['method'])
+            randomN = random.uniform(0.0, 100.0)
+            # 5%
+            if randomN <= 5.0:
+                time.sleep(0.1)
+                xy = (15.675, 4.9625)
+                xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
+                page.mouse.move(x=xy_scale["x"], y=xy_scale["y"])
+                time.sleep(0.1)
+                page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
+                logger.debug(f"page_clicker: {xy_scale} click emotions")
+                time.sleep(0.3)
+                index = random.randint(0, 8)
+                # index = 2
+                xy = self.LOCATION["emotions"][index]
+                xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
+                page.mouse.move(x=xy_scale["x"], y=xy_scale["y"])
+                time.sleep(0.1)
+                page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
+                logger.debug(
+                    f"page_clicker: {xy_scale} click the {index} emotion")
 
     def auto_next(self, page, scale, parse_msg):
         if parse_msg['method'] == '.lq.NotifyGameEndResult':
@@ -325,13 +325,13 @@ class MajsoulAutomator:
                 if len(self.gm_msgs) > 0:
                     gm_msg = self.gm_msgs.pop(0)
                     self.handle_gm_message(gm_msg)
+                    # 开启随机发送表情
+                    self.randomEmotion(page, self.scale, gm_msg)
                     # 开启自动下一局
                     self.auto_next(page, self.scale, gm_msg)
                 click_list = get_click_list()
                 if len(click_list) > 0:
                     self.handle_click_list(page, click_list)
-                    # 开启随机发送表情
-                    self.randomEmotion(page, self.scale, gm_msg)
                 else:
                     page.wait_for_timeout(100)
         except KeyboardInterrupt:
