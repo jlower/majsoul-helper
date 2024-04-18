@@ -87,11 +87,12 @@ class MajsoulAutomator:
         websocket.on("framereceived", on_received)
 
     def randomEmotion(self, page, scale, parse_msg):
-        if parse_msg['method'] == '.lq.NotifyGameBroadcast':
-            # print("111111111111111111111111",parse_msg['method'])
+        # print("111111111111111111111111",parse_msg['method'])
+        # if parse_msg['method'] == '.lq.NotifyGameBroadcast':
+        if parse_msg['method'] == '.lq.ActionPrototype':
             randomN = random.uniform(0.0, 100.0)
-            # 50%
-            if randomN <= 50.0:
+            # 0.6%
+            if randomN <= 0.6:
                 time.sleep(0.1)
                 xy = (15.675, 4.9625)
                 xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
