@@ -147,6 +147,10 @@ class MajsoulAutomator:
             page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
             time.sleep(8)
 
+            # 活动多了一个页面，临时添加的，不用时注释掉
+            # page.mouse.click(x=xy_scale["x"], y=xy_scale["y"], delay=100)
+            # time.sleep(10)
+
             # 7. 大厅界面点击段位场
             xy_scale = {"x": self.LOCATION['endGameStage'][2][0] * scale,
                         "y": self.LOCATION['endGameStage'][2][1] * scale}
