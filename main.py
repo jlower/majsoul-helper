@@ -87,7 +87,7 @@ class MajsoulAutomator:
         websocket.on("framereceived", on_received)
 
     def randomEmotion(self, page, scale, parse_msg):
-        # print("111111111111111111111111",parse_msg['method'])
+        # print("log.test++++++++++++++++++++++",parse_msg['method'])
         # if parse_msg['method'] == '.lq.NotifyGameBroadcast':
         if parse_msg['method'] == '.lq.ActionPrototype':
             randomN = random.uniform(0.0, 100.0)
@@ -322,18 +322,20 @@ class MajsoulAutomator:
             self.playwright_height = 720
             self.scale = self.playwright_width / 16
 
+            gm_msg = None # gm_msg = {}
             while True:
                 if len(self.gm_msgs) > 0:
                     gm_msg = self.gm_msgs.pop(0)
                     self.handle_gm_message(gm_msg)
-                    # 开启随机发送表情
-                    self.randomEmotion(page, self.scale, gm_msg)
                     # 开启自动下一局
                     self.auto_next(page, self.scale, gm_msg)
                 click_list = get_click_list()
                 if len(click_list) > 0:
                     self.handle_click_list(page, click_list)
                 else:
+                    if len(self.gm_msgs) > 0:
+                        # 开启随机发送表情
+                        self.randomEmotion(page, self.scale, gm_msg)
                     page.wait_for_timeout(100)
         except KeyboardInterrupt:
             self.close_browser()
