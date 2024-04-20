@@ -90,10 +90,11 @@ class MajsoulAutomator:
         # print("log.test++++++++++++++++++++++",parse_msg['method'])
         # if parse_msg['method'] == '.lq.NotifyGameBroadcast':
         if parse_msg['method'] == '.lq.ActionPrototype':
+            # 基本上每次自动点击事件都会进来一次
             randomN = random.uniform(0.0, 100.0)
-            # 0.6%
-            if randomN <= 0.6:
-                time.sleep(0.1)
+            # 5%
+            if randomN <= 5.0:
+                time.sleep(0.3)
                 xy = (15.675, 4.9625)
                 xy_scale = {"x": xy[0]*scale, "y": xy[1]*scale}
                 page.mouse.move(x=xy_scale["x"], y=xy_scale["y"])
@@ -332,10 +333,11 @@ class MajsoulAutomator:
                 click_list = get_click_list()
                 if len(click_list) > 0:
                     self.handle_click_list(page, click_list)
-                else:
                     if len(self.gm_msgs) > 0:
+                        # 每次点击事件发生后进来一次，基本上都是parse_msg['method'] == '.lq.ActionPrototype'
                         # 开启随机发送表情
                         self.randomEmotion(page, self.scale, gm_msg)
+                else:
                     page.wait_for_timeout(100)
         except KeyboardInterrupt:
             self.close_browser()
