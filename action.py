@@ -291,7 +291,7 @@ class Action:
 
         # 获取每个操作的ai推荐率
         ai_pais = meta_to_recommend(mjai_msg['meta'])
-        selected_pai = ai_pais[0][0]
+        selected_pai = mjai_msg['pai']
 
         # 废弃的方法
         # global first_pai_count
@@ -374,7 +374,7 @@ class Action:
         #     first_pai_count += 1
         #     selected_pai = ai_pais[0][0]
         # print(str(first_pai_count), " / ", str(all_pai_count))
-        
+
         # 废弃的方法
         # if len(ai_pais) > 1 and ai_pais[0][1] < 0.63:
         #     # 以13%的概率选择第二个，87%的概率选择第一个
@@ -409,9 +409,10 @@ class Action:
         # 用此方法随机，掉分，若注释此段则一直一选
         if ai_pais[0][1] < 0.85:
             # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
-            ex_power = 0.4 # 取0.45时重合率71%~81%,分数92~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
-            # 筛选出概率大于0.15的元组
-            filtered_list = [(pai, prob ** ex_power) for pai, prob in ai_pais if prob > 0.12]
+            ex_power = 0.4  # 取0.45时重合率71%~81%,分数92~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
+            # 筛选出概率大于0.12的元组
+            filtered_list = [(pai, prob ** ex_power)
+                             for pai, prob in ai_pais if prob > 0.12]
             # 计算总权重
             total_weight = sum(prob for _, prob in filtered_list)
             # 随机选择一个操作
@@ -423,7 +424,9 @@ class Action:
                     selected_pai = pai
                     break
 
-        mjai_msg['pai'] = selected_pai
+        if selected_pai not in ['none', 'chi', 'pon', 'daiminkan', 'ankan', 'kakan', 'hora', 'reach', 'ryukyoku', 'nukidora']:
+            mjai_msg['pai'] = selected_pai
+
         dahai = mjai_msg['pai']
         if self.isNewRound:
             # In Majsoul, if you are the first dealer, there is no tsumohai, but 14 tehai.
