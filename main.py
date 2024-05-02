@@ -64,6 +64,8 @@ class MajsoulAutomator:
             viewport={'width': self.playwright_width,
                       'height': self.playwright_height},
             ignore_default_args=['--enable-automation'],
+            # TODO 添加浏览器参数，适配全皮肤
+            args=[],
         )
 
         return browser
@@ -303,6 +305,7 @@ class MajsoulAutomator:
         try:
             browser = self.launch_browser()
             page = browser.new_page()
+            # TODO 设置服务器
             # 国服
             page.goto('https://game.maj-soul.com/1/')
             # 国际服
@@ -317,30 +320,30 @@ class MajsoulAutomator:
             page.on("websocket",
                     lambda websocket: self.handle_websocket_event(websocket))
 
-            # 设置更改
+            # TODO 设置更改
             # 可以选 铜之间: copper 银之间: silver 金之间: gold 玉之间: jade 王座之间: king
             self.next_game_Rank = 'silver'
             # 可以选 3p 4p
             self.next_game_number = '4p'
             # 可以选 南风: south 东风: east
-            self.next_game_rounds = 'south'
+            self.next_game_rounds = 'south'  # 'east'
             self.playwright_width = 1280
             self.playwright_height = 720
             self.scale = self.playwright_width / 16
 
-            gm_msg = None # gm_msg = {}
+            gm_msg = None  # gm_msg = {}
             while True:
                 if len(self.gm_msgs) > 0:
                     gm_msg = self.gm_msgs.pop(0)
                     self.handle_gm_message(gm_msg)
-                    # 开启自动下一局
+                    # TODO 开启自动下一局
                     self.auto_next(page, self.scale, gm_msg)
                 click_list = get_click_list()
                 if len(click_list) > 0:
                     self.handle_click_list(page, click_list)
                     if len(self.gm_msgs) > 0:
                         # 每次点击事件发生后进来一次，基本上都是parse_msg['method'] == '.lq.ActionPrototype'
-                        # 开启随机发送表情
+                        # TODO 开启随机发送表情
                         self.randomEmotion(page, self.scale, gm_msg)
                 else:
                     page.wait_for_timeout(100)
