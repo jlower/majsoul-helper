@@ -424,6 +424,7 @@ class Action:
                     selected_pai = pai
                     break
 
+        # TODO 若注释此段则一直一选
         if selected_pai not in ['none', 'chi', 'pon', 'daiminkan', 'ankan', 'kakan', 'hora', 'reach', 'ryukyoku', 'nukidora']:
             mjai_msg['pai'] = selected_pai
 
@@ -460,7 +461,7 @@ class Action:
 
     def mjai2action(self, mjai_msg: dict | None, tehai: list[str], tsumohai: str | None):
         # print(f"mjai2action: mjai_msg:{mjai_msg} tehai:{tehai} tsomohai:{tsumohai}")
-        # 打印4p场每个操作ai的推荐率
+        # TODO 打印4p场每个操作ai的推荐率
         print(meta_to_recommend(mjai_msg['meta']))
         # 将字符串解析为字典
         dahai_delay = self.decide_random_time()
