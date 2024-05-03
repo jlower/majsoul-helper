@@ -427,7 +427,7 @@ class Action:
         # 用此方法随机，玉之间上分，rating在92左右，重合率73%左右，若注释此段则一直一选
         if ai_pais[0][1] < 0.96:
             # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
-            ex_power = 0.85 # 取0.8时重合率73%左右,rating在92左右;取0.9时重合率80%左右,rating在93左右;
+            ex_power = 0.8 # 取0.8时重合率73%左右,rating在92左右;取0.9时重合率80%左右,rating在93左右;
             # 筛选出概率大于0.04的元组
             filtered_list = [(pai, prob ** ex_power)
                              for pai, prob in ai_pais if prob > 0.04]
