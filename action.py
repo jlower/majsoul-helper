@@ -406,13 +406,13 @@ class Action:
         #             selected_pai = pai
         #             break
 
-        # 用此方法随机，金之间上分，玉之间掉分，rating稍高95左右，重合率75%左右，若注释此段则一直一选
-        # if ai_pais[0][1] < 0.85:
+        # 用此方法随机，rating在92左右，重合率73%左右，有恶手，若注释此段则一直一选
+        # if ai_pais[0][1] < 0.96:
         #     # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
-        #     ex_power = 0.4  # 取0.45时重合率71%~81%,分数92~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
-        #     # 筛选出概率大于0.12的元组
+        #     ex_power = 0.8 # 取0.8时重合率73%左右,rating在92左右;取0.9时重合率80%左右,rating在93左右;
+        #     # 筛选出概率大于0.04的元组
         #     filtered_list = [(pai, prob ** ex_power)
-        #                      for pai, prob in ai_pais if prob > 0.12]
+        #                      for pai, prob in ai_pais if prob > 0.04]
         #     # 计算总权重
         #     total_weight = sum(prob for _, prob in filtered_list)
         #     # 随机选择一个操作
@@ -424,13 +424,31 @@ class Action:
         #             selected_pai = pai
         #             break
 
-        # 用此方法随机，玉之间上分，rating在92左右，重合率73%左右，若注释此段则一直一选
-        if ai_pais[0][1] < 0.96:
+        # 用此方法随机，若注释此段则一直一选
+        # if len(ai_pais) > 1 and ai_pais[0][1] - ai_pais[1][1] < 0.3:
+        #     # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
+        #     ex_power = 1.7
+        #     # 筛选出概率大于0.04的元组,不含第一个元素
+        #     filtered_list = [(pai, prob ** ex_power)
+        #                      for pai, prob in ai_pais[1:] if prob > 0.1]
+        #     # 计算总权重
+        #     total_weight = sum(prob for _, prob in filtered_list)
+        #     # 随机选择一个操作
+        #     random_value = random.uniform(0, total_weight)
+        #     cumulative_weight = 0
+        #     for pai, prob in filtered_list:
+        #         cumulative_weight += prob
+        #         if random_value <= cumulative_weight:
+        #             selected_pai = pai
+        #             break
+
+        # 用此方法随机，金之间上分，玉之间掉分，rating稍高95左右，重合率75%左右，若注释此段则一直一选
+        if ai_pais[0][1] < 0.85:
             # 改变一选的概率: 0~1.0时，越接近0非一选的概率越大 ; 大于1.0时，越大一选的概率越大(一般取1~5)
-            ex_power = 0.8 # 取0.8时重合率73%左右,rating在92左右;取0.9时重合率80%左右,rating在93左右;
-            # 筛选出概率大于0.04的元组
+            ex_power = 0.4  # 取0.45时重合率71%~81%,分数92~95;取0.4时重合率68%~75%,分数90~94;取0.5时重合率84%~85.5%,分数94~95
+            # 筛选出概率大于0.12的元组
             filtered_list = [(pai, prob ** ex_power)
-                             for pai, prob in ai_pais if prob > 0.04]
+                             for pai, prob in ai_pais if prob > 0.12]
             # 计算总权重
             total_weight = sum(prob for _, prob in filtered_list)
             # 随机选择一个操作
