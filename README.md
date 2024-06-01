@@ -54,6 +54,13 @@ python pip install -r requirements.txt
 使用 Akagi
 
 > 到 [Discord](https://discord.gg/Z2wjXUK8bN) 下载 Akagi 提供的 bot.zip。 注: 网盘中除 v2 版本均可用，任选一个下载。解压获取 **mortal.pth** 文件，放置到 bot 文件夹中。
+>
+> https://pan.baidu.com/s/1pENphNS2DPH9m5I0uJnShg?pwd=b9zq 提取码: b9zq
+>
+> https://cloud.189.cn/web/share?code=ZFFBFjZrqiyi 访问码: eku6
+>
+> 自己在百度网盘和天翼网盘上也存了，在 **Akagi_雀魂_BOT** 文件夹中
+>
 > 注: 3p 的 mortal.pth 文件需捐赠 Akagi 进行获取.
 
 启动
