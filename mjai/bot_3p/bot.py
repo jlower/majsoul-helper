@@ -17,7 +17,7 @@ class Bot:
         with open(model_path, "rb") as f:
             self.model_hash = hashlib.sha256(f.read()).hexdigest()
         try:
-            with open(pathlib.Path(__file__).parent / "online.json", "r") as f:
+            with open(pathlib.Path(__file__).parent.parent / "online.json", "r") as f:
                 online_json = json.load(f)
                 self.online = online_json["online"]
                 if not self.online:
@@ -30,11 +30,11 @@ class Bot:
                 r = requests.post(f"{server}/check", headers=headers)
                 r_json = r.json()
                 if r_json["result"] == "success":
-                    self.model_hash = "online"
+                    self.model_hash = "online_3p"
         except Exception as e:
             logger.error(e)
             self.online = False
-
+            
     def react(self, events: str) -> str:
         events = json.loads(events)
 
@@ -52,7 +52,7 @@ class Bot:
 
     def state(self):
         return self.model.state
-        
+
 
 def main():
     player_id = int(sys.argv[1])
