@@ -322,11 +322,11 @@ class MajsoulAutomator:
 
             # TODO 设置更改
             # 可以选 铜之间: copper 银之间: silver 金之间: gold 玉之间: jade 王座之间: king
-            self.next_game_Rank = 'silver'
+            self.next_game_Rank = 'copper'
             # 可以选 3p 4p
             self.next_game_number = '4p'
             # 可以选 南风: south 东风: east
-            self.next_game_rounds = 'south'  # 'east'
+            self.next_game_rounds = 'east'  # 'south'
             self.playwright_width = 1280
             self.playwright_height = 720
             self.scale = self.playwright_width / 16
