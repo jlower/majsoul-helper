@@ -309,7 +309,7 @@ class MajsoulAutomator:
             # 国服
             page.goto('https://game.maj-soul.com/1/')
             # 国际服
-            # page.goto('https://mahjongsoul.game.yo-star.com/')
+            page.goto('https://mahjongsoul.game.yo-star.com/')
             # 日服
             # page.goto('https://game.mahjongsoul.com/index.html')
             # https://stackoverflow.com/questions/73209567/close-or-switch-tabs-in-playwright-python
@@ -322,11 +322,11 @@ class MajsoulAutomator:
 
             # TODO 设置更改
             # 可以选 铜之间: copper 银之间: silver 金之间: gold 玉之间: jade 王座之间: king
-            self.next_game_Rank = 'copper'
+            self.next_game_Rank = 'silver'
             # 可以选 3p 4p
             self.next_game_number = '4p'
             # 可以选 南风: south 东风: east
-            self.next_game_rounds = 'east'  # 'south'
+            self.next_game_rounds = 'south'  # 'east'
             self.playwright_width = 1280
             self.playwright_height = 720
             self.scale = self.playwright_width / 16
@@ -337,7 +337,7 @@ class MajsoulAutomator:
                     gm_msg = self.gm_msgs.pop(0)
                     self.handle_gm_message(gm_msg)
                     # TODO 开启自动下一局
-                    self.auto_next(page, self.scale, gm_msg)
+                    # self.auto_next(page, self.scale, gm_msg)
                 click_list = get_click_list()
                 if len(click_list) > 0:
                     self.handle_click_list(page, click_list)
