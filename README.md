@@ -8,7 +8,10 @@
 
 - [x] 支持[Akagi](https://github.com/shinkuan/Akagi)
 - [x] 自动打牌，自动随机出牌
-- [ ] 自动连续打牌
+- [x] 自动连续打牌
+- [ ] 本地全皮肤
+- [ ] 兼容小助手
+- [ ] 随机星标皮肤
 
 ## 欢迎 PR
 
@@ -43,6 +46,10 @@ python -m pip config set global.index-url https://mirror.nju.edu.cn/pypi/web/sim
 ```
 
 安装依赖
+
+> `requirements.txt` 文件中的 `--find-links` 后的链接可以从下面两个链接中任选一个填入：
+> 1. https://github.com/jlower/majsoul-helper/releases/expanded_assets/v0.1.1-libriichi-dependencies
+> 1. https://github.com/shinkuan/Akagi/releases/expanded_assets/v0.1.1-libriichi
 
 ```bash
 python pip install --upgrade pip
