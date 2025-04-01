@@ -307,7 +307,7 @@ class MajsoulAutomator:
             page = browser.new_page()
             # TODO 设置服务器
             # 国服
-            page.goto('https://game.maj-soul.com/1/')
+            # page.goto('https://game.maj-soul.com/1/')
             # 国际服
             page.goto('https://mahjongsoul.game.yo-star.com/')
             # 日服
