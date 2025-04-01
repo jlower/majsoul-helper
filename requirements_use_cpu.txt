@@ -4,5 +4,5 @@ loguru>=0.7.2
 playwright>=1.41.0
 requests>=2.31.0
 torch>=2.2.1
---find-links https://github.com/shinkuan/Akagi/releases/expanded_assets/v0.1.1-libriichi
+--find-links https://github.com/jlower/majsoul-helper/releases/expanded_assets/v0.1.1-libriichi-dependencies
 riichi>=0.1.1
