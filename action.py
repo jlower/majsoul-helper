@@ -460,8 +460,8 @@ class Action:
                     break
 
         # TODO 若注释此段则一直一选
-        if selected_pai not in ['kan_select', 'none', 'chi', 'pon', 'daiminkan', 'ankan', 'kakan', 'hora', 'reach', 'ryukyoku', 'nukidora']:
-            mjai_msg['pai'] = selected_pai
+        # if selected_pai not in ['kan_select', 'none', 'chi', 'pon', 'daiminkan', 'ankan', 'kakan', 'hora', 'reach', 'ryukyoku', 'nukidora']:
+        #     mjai_msg['pai'] = selected_pai
 
         dahai = mjai_msg['pai']
         if self.isNewRound:
